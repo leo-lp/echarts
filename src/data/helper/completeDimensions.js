@@ -10,7 +10,7 @@ define(function (require) {
     var defaults = zrUtil.defaults;
     var normalizeToArray = modelUtil.normalizeToArray;
 
-    var OTHER_DIMS = {tooltip: 1, label: 1, name: 1};
+    var OTHER_DIMS = {tooltip: 1, label: 1, itemName: 1};
 
     /**
      * Complete the dimensions array, by user defined `dimension` and `encode`,
@@ -28,6 +28,10 @@ define(function (require) {
      *      For example: ['asdf', {name, type}, ...].
      * @param {Object} [opt.encodeDef] option.series.encode {x: 2, y: [3, 1], tooltip: [1, 2], label: 3}
      * @param {string} [opt.extraPrefix] Prefix of name when filling the left dimensions.
+     * @param {string} [opt.extraFromZero] If specified, extra dim names will be:
+     *                      extraPrefix + 0, extraPrefix + extraBaseIndex + 1 ...
+     *                      If not specified, extra dim names will be:
+     *                      extraPrefix, extraPrefix + 0, extraPrefix + 1 ...
      * @param {number} [opt.dimCount] If not specified, guess by the first data item.
      * @return {Array.<Object>} [{
      *      name: string mandatory,
@@ -44,6 +48,7 @@ define(function (require) {
      * }]
      */
     function completeDimensions(sysDims, data, opt) {
+        data = data || [];
         opt = opt || {};
         sysDims = (sysDims || []).slice();
         var dimsDef = (opt.dimsDef || []).slice();
@@ -78,9 +83,9 @@ define(function (require) {
                 // will be set, and dimension will be diplayed vertically in
                 // tooltip by default.
                 resultItem.name = resultItem.tooltipName = userDimName;
-                dimDefItem.type != null && (resultItem.type = dimDefItem.type);
                 dataDimNameMap.set(userDimName, i);
             }
+            dimDefItem.type != null && (resultItem.type = dimDefItem.type);
         }
 
         // Set `coordDim` and `coordDimIndex` by `encodeDef` and normalize `encodeDef`.
@@ -92,7 +97,6 @@ define(function (require) {
                 if (resultDimIdx != null && resultDimIdx < dimCount) {
                     dataDims[coordDimIndex] = resultDimIdx;
                     applyDim(result[resultDimIdx], coordDim, coordDimIndex);
-                    // coordDim === 'value' && valueCandidate == null && (valueCandidate = resultDimIdx);
                 }
             });
         });
@@ -132,7 +136,6 @@ define(function (require) {
             each(dataDims, function (resultDimIdx, coordDimIndex) {
                 var resultItem = result[resultDimIdx];
                 applyDim(defaults(resultItem, sysDimItem), coordDim, coordDimIndex);
-                // coordDim === 'value' && valueCandidate == null && (valueCandidate = resultDimIdx);
                 if (resultItem.name == null && sysDimItemDimsDef) {
                     resultItem.name = resultItem.tooltipName = sysDimItemDimsDef[coordDimIndex];
                 }
@@ -149,20 +152,12 @@ define(function (require) {
             var coordDim = resultItem.coordDim;
 
             coordDim == null && (
-                resultItem.coordDim = genName(extra, coordDimNameMap),
+                resultItem.coordDim = genName(extra, coordDimNameMap, opt.extraFromZero),
                 resultItem.coordDimIndex = 0,
                 resultItem.isExtraCoord = true
             );
 
             resultItem.name == null && (resultItem.name = genName(
-                // Ensure At least one value dim.
-                // (dataDimNameMap.get('value') == null
-                //     && (valueCandidate == null || valueCandidate === resultDimIdx)
-                //     // Try to set as 'value' only if coordDim is not set as 'extra'.
-                //     && coordDim == null
-                // )
-                // ? 'value'
-                // :
                 resultItem.coordDim,
                 dataDimNameMap
             ));
@@ -184,8 +179,8 @@ define(function (require) {
             }
         }
 
-        function genName(name, map) {
-            if (map.get(name) != null) {
+        function genName(name, map, fromZero) {
+            if (fromZero || map.get(name) != null) {
                 var i = 0;
                 while (map.get(name + i) != null) {
                     i++;
@@ -208,6 +203,7 @@ define(function (require) {
             }
 
             var value = value[dimIndex];
+            // Consider usage convenience, '1', '2' will be treated as "number".
             if (value != null && isFinite(value)) {
                 return false;
             }

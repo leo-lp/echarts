@@ -8,7 +8,6 @@ define(function(require) {
     var modelUtil = require('../util/model');
     var ComponentModel = require('./Component');
     var colorPaletteMixin = require('./mixin/colorPalette');
-    var graphic = require('../util/graphic');
     var env = require('zrender/core/env');
     var layout = require('../util/layout');
 
@@ -219,7 +218,7 @@ define(function(require) {
             function formatArrayValue(value) {
                 var vertially = zrUtil.reduce(value, function (vertially, val, idx) {
                     var dimItem = data.getDimensionInfo(idx);
-                    return vertially |= dimItem.tooltip !== false && dimItem.tooltipName != null;
+                    return vertially |= dimItem && dimItem.tooltip !== false && dimItem.tooltipName != null;
                 }, 0);
 
                 var result = [];
@@ -265,7 +264,7 @@ define(function(require) {
             }
             color = color || 'transparent';
 
-            var colorEl = graphic.getTooltipDot(color);
+            var colorEl = formatUtil.getTooltipMarker(color);
 
             var seriesName = this.name;
             // FIXME
@@ -273,14 +272,16 @@ define(function(require) {
                 // Not show '-'
                 seriesName = '';
             }
-            seriesName = seriesName ? encodeHTML(seriesName) : '';
+            seriesName = seriesName
+                ? encodeHTML(seriesName) + (!multipleSeries ? '<br/>' : ': ')
+                : '';
             return !multipleSeries
-                ? seriesName + '<br/>' + colorEl
+                ? seriesName + colorEl
                     + (name
                         ? encodeHTML(name) + ': ' + formattedValue
                         : formattedValue
                     )
-                : (colorEl + encodeHTML(seriesName) + ': ' + formattedValue);
+                : colorEl + seriesName + formattedValue;
         },
 
         /**

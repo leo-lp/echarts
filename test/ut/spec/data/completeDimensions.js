@@ -514,6 +514,47 @@ describe('completeDimensions', function () {
             ]
         );
         doTest(
+            ['x', 'y', 'value'], data,
+            {dimsDef: ['挨克思', null, {type: 'ordinal'}]}, // no name but only type
+            [
+                {
+                    'otherDims': {},
+                    'tooltipName': '挨克思',
+                    'name': '挨克思',
+                    'type': 'ordinal',
+                    'coordDim': 'x',
+                    'coordDimIndex': 0
+                },
+                {
+                    'otherDims': {},
+                    'coordDim': 'y',
+                    'coordDimIndex': 0,
+                    'name': 'y'
+                },
+                {
+                    'otherDims': {},
+                    'name': 'value',
+                    'coordDim': 'value',
+                    'type': 'ordinal',
+                    'coordDimIndex': 0
+                },
+                {
+                    'otherDims': {},
+                    'coordDim': 'value0',
+                    'coordDimIndex': 0,
+                    'isExtraCoord': true,
+                    'name': 'value0'
+                },
+                {
+                    'otherDims': {},
+                    'coordDim': 'value1',
+                    'coordDimIndex': 0,
+                    'isExtraCoord': true,
+                    'name': 'value1'
+                }
+            ]
+        );
+        doTest(
             [{name: 'time', type: 'time', stackable: false}, 'value'], data,
             {dimsDef: [{name: '泰亩', type: 'ordinal'}, {name: '歪溜', type: 'float'}]},
             [
@@ -820,6 +861,69 @@ describe('completeDimensions', function () {
                     'coordDimIndex': 0,
                     'isExtraCoord': true,
                     'name': 'aaa2'
+                }
+            ]
+        );
+
+        doTest(
+            [{name: 'time', type: 'time', stackable: false}, 'value'], data,
+            {
+                // dimsDef type 'ordinal' has higher priority then sysDims type 'time'.
+                dimsDef: [{name: '泰亩', type: 'ordinal'}, {name: '歪溜', type: 'float'}],
+                encodeDef: {
+                    tooltip: 2
+                },
+                extraPrefix: 'aaa',
+                extraFromZero: true
+            },
+            [
+                {
+                    'otherDims': {},
+                    'tooltipName': '泰亩',
+                    'name': '泰亩',
+                    'type': 'ordinal',
+                    'stackable': false,
+                    'coordDimIndex': 0,
+                    'coordDim': 'time'
+                },
+                {
+                    'otherDims': {},
+                    'tooltipName': '歪溜',
+                    'name': '歪溜',
+                    'type': 'float',
+                    'coordDim': 'value',
+                    'coordDimIndex': 0
+                },
+                {
+                    'otherDims': {
+                        'tooltip': 0
+                    },
+                    'coordDim': 'aaa0',
+                    'coordDimIndex': 0,
+                    'isExtraCoord': true,
+                    'name': 'aaa0'
+                },
+                {
+                    'otherDims': {},
+                    'coordDim': 'aaa1',
+                    'coordDimIndex': 0,
+                    'isExtraCoord': true,
+                    'name': 'aaa1'
+                },
+                {
+                    'otherDims': {},
+                    'coordDim': 'aaa2',
+                    'coordDimIndex': 0,
+                    'isExtraCoord': true,
+                    'name': 'aaa2',
+                    'type': 'ordinal'
+                },
+                {
+                    'otherDims': {},
+                    'coordDim': 'aaa3',
+                    'coordDimIndex': 0,
+                    'isExtraCoord': true,
+                    'name': 'aaa3'
                 }
             ]
         );

@@ -63,7 +63,7 @@ define(function (require) {
             this._optionManager = optionManager;
         },
 
-        setOption: function (option, optionPreprocessorFuncs, onlyGraphic) {
+        setOption: function (option, optionPreprocessorFuncs) {
             zrUtil.assert(
                 !(OPTION_INNER_KEY in option),
                 'please use chart.getOption()'
@@ -71,7 +71,7 @@ define(function (require) {
 
             this._optionManager.setOption(option, optionPreprocessorFuncs);
 
-            this.resetOption(null, onlyGraphic);
+            this.resetOption(null);
         },
 
         /**
@@ -81,7 +81,7 @@ define(function (require) {
          *                      'media': only reset media query option
          * @return {boolean} Whether option changed.
          */
-        resetOption: function (type, onlyGraphic) {
+        resetOption: function (type) {
             var optionChanged = false;
             var optionManager = this._optionManager;
 
@@ -92,11 +92,7 @@ define(function (require) {
                     initBase.call(this, baseOption);
                 }
                 else {
-                    // If only graphic, other series and component will not
-                    // go through update process, data should not be restored.
-                    // Otherwise grphic els mounted on data will be eliminated
-                    // and downplay will not work.
-                    !onlyGraphic && this.restoreData();
+                    this.restoreData();
                     this.mergeOption(baseOption);
                 }
                 optionChanged = true;
@@ -552,6 +548,13 @@ define(function (require) {
         },
 
         /**
+         * @return {Array.<number>}
+         */
+        getCurrentSeriesIndices: function () {
+            return (this._seriesIndices || []).slice();
+        },
+
+        /**
          * @param {Function} cb
          * @param {*} context
          */
@@ -702,7 +705,7 @@ define(function (require) {
         // which make sure that their initialization is after series.
         if (__DEV__) {
             if (!ecModel._seriesIndices) {
-                throw new Error('Series has not been initialized yet.');
+                throw new Error('Option should contains series.');
             }
         }
     }

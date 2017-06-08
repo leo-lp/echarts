@@ -277,7 +277,7 @@ define(function (require) {
         // Init storage
         for (var i = 0; i < dimensions.length; i++) {
             var dimInfo = dimensionInfoMap[dimensions[i]];
-            dimInfo.otherDims.name === 0 && (nameDimIdx = i);
+            dimInfo.otherDims.itemName === 0 && (nameDimIdx = i);
             var DataCtor = dataCtors[dimInfo.type];
             storage[dimensions[i]] = new DataCtor(size);
         }
@@ -743,7 +743,10 @@ define(function (require) {
         for (var i = 0; i < indices.length; i++) {
             var keep;
             // Simple optimization
-            if (dimSize === 1) {
+            if (!dimSize) {
+                keep = cb.call(context, i);
+            }
+            else if (dimSize === 1) {
                 keep = cb.call(
                     context, this.get(dimensions[0], i, stack), i
                 );
